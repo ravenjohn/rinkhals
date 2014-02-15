@@ -74,9 +74,8 @@
         b.style.width = data.w + 'px';
         b.style.height = data.h + 'px';
     });
-              
+
     socket.on('move', function (data) {
-        console.log('move', data.orientation, data.headX, data.headY);
         snakes[data.id].length = data.length;
         snakes[data.id].orientation = data.orientation;
         snakes[data.id].drawHead(data.headX, data.headY);
@@ -87,6 +86,7 @@
         temp.style.width = temp.style.height = '10px';
         temp.style.position = 'absolute';
         temp.style.zIndex = 999999;
+        temp.style.boderRadius = '5px';
         temp.style.left = data.x + 'px';
         temp.style.top = data.y + 'px';
         temp.className = 'food' + data.x + data.y;
@@ -114,18 +114,17 @@
         (temp > -1 && temp < 4 && ~~(temp - mysnake.orientation) % 2) && socket.emit('move', {orientation : temp});
     };
 
-    if (confirm("New Game?")) {
+    if (location.hash.substring(1)) {
+        socket.emit("new", {
+            id : location.hash.substring(1),
+            name : prompt("Name") || "Other Player"
+        });
+    } else {
         socket.emit("new", {
             m : prompt("Max players [1-50]"),
             name : prompt("Name") || "Player One",
             h : height,
             w : width
         });
-    }
-    else {
-        socket.emit("new", {
-            id : prompt("ID"),
-            name : prompt("Name") || "Other Player"
-        });    
     }
 }));
