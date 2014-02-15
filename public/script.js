@@ -10,7 +10,8 @@
     document.body.appendChild(s);
     document.body.innerHTML += '<div id="_snake_cover"></div>';
 
-} ('http://ravenjohn.adin234.tk/socket.io/socket.io.js', function (root, src) {
+} ('http://desolate-bastion-8292.herokuapp.com/socket.io/socket.io.js', function (root, src) {
+// } ('http://ravenjohn.adin234.tk/socket.io/socket.io.js', function (root, src) {
 // } ('http://localhost:3000/socket.io/socket.io.js', function (root, src) {
 // } ('http://192.168.1.50:3000/socket.io/socket.io.js', function (root, src) {
 
