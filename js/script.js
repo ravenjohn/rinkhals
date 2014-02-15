@@ -5,15 +5,15 @@
     s.async = false;
     s.onreadystatechange = s.onload = function () {
         var state = s.readyState;
-        (!state || /loaded|complete/.test(state)) && callback(this);
+        (!state || /loaded|complete/.test(state)) && callback(this, src.substring(0, src.length - 23));
     };
     document.body.appendChild(s);
     document.body.innerHTML += '<div id="_snake_cover"></div>';
 } ('http://ravenjohn.adin234.tk:8080/socket.io/socket.io.js',
-    function (root) {
+    function (root, src) {
 
     var b = document.getElementById('_snake_cover'),
-        socket = io.connect("//192.168.1.50:8080"),
+        socket = io.connect(src),
         snakes,
         mysnake,
         width = ~~(window.innerWidth / 10) * 10,
