@@ -11,21 +11,24 @@
     document.body.innerHTML += '<div id="_snake_cover"></div>';
 
 } ('http://ravenjohn.adin234.tk:8080/socket.io/socket.io.js', function (root, src) {
+// } ('http://localhost:8080/socket.io/socket.io.js', function (root, src) {
 
     var snakes,
         mysnake,
         interval,
         gameStarted = false,
         socket = io.connect(src),
-        width = ~~(window.innerWidth / 10) * 10,
-        height = ~~(window.innerHeight / 10) * 10,
+        // width = ~~(window.innerWidth / 10) * 10,
+        // height = ~~(window.innerHeight / 10) * 10,
+        width = 1000,
+        height = 500,
         b = document.getElementById('_snake_cover'),
-        Snake = function (x, y) {
-            this.unitSize = 10;
+        Snake = function (color) {
+            this.color = color;
+            
             this.body = [];
-            this.headX = x;
-            this.headY = y;
             this.orientation = 2;
+            this.unitSize = 10;
             this.drawHead = function (x, y) {
                 var temp;
 
@@ -33,7 +36,7 @@
                 //    return start();
 
                 this.body.length > 5 && (temp = this.body.pop()) && temp.remove();
-                (temp = this.body[0]) && (temp.style.background = 'black');
+                (temp = this.body[0]) && (temp.style.background = this.color);
                 temp = document.createElement('div');
                 temp.style.width = temp.style.height = this.unitSize + 'px';
                 temp.className = 'r' + x + y;
@@ -45,27 +48,12 @@
                 this.body.unshift(temp);
                 b.appendChild(temp);
             }
-        },
-        start = function () {
-            var i;
-            gameStarted = true;
-            interval = setInterval(function () {
-               var i, temp;
-               for (i in snakes){
-                   temp = snakes[i];
-                   switch (temp.orientation) {
-                       case 0 : temp.drawHead(temp.headX - temp.unitSize, temp.headY); break;
-                       case 1 : temp.drawHead(temp.headX, temp.headY - temp.unitSize); break;
-                       case 2 : temp.drawHead(temp.headX + temp.unitSize, temp.headY); break;
-                       case 3 : temp.drawHead(temp.headX, temp.headY + temp.unitSize);
-                   }
-               }
-            }, 100);
         };
     
     b.style.position = 'fixed';
     b.style.top = 0;
     b.style.left = 0;
+    b.style.border = '1px solid red';
     
     socket.on("id", function (data) {
         location.hash = data.id;
@@ -75,24 +63,31 @@
         var i, temp;
         snakes = {};
         for (i in data.players) {
-            snakes[i] = new Snake(data.players[i].headX, data.players[i].headY);
+            snakes[i] = new Snake(data.players[i].color);
         }
         mysnake = snakes[socket.socket.sessionid];
         b.style.width = data.w + 'px';
         b.style.height = data.h + 'px';
-        console.log(data.playerCount);
-        //if(!gameStarted && data.playerCount === 2) start ();
     });
               
     socket.on('move', function (data) {
-        //snakes[data.id].orientation = data.orientation;
-        var i, temp;
-        for (i in data){
-            snakes[i].orientation = data[i].orientation;
-            snakes[i].headX = data[i].headX;
-            snakes[i].headY = data[i].headY;
-            temp = snakes[i];
-            temp.drawHead(temp.headX, temp.headY); break;
+        console.log('move', data.orientation, data.headX, data.headY);
+        snakes[data.id].orientation = data.orientation;
+        snakes[data.id].drawHead(data.headX, data.headY);
+    });
+    
+    socket.on('collision', function (data) {
+        if (data.id === 'tie') {
+            alert('You bump into each other :O sweet.');
+        } else if (data.id === socket.socket.sessionid) {
+            alert('You lose! booooooo');
+            if (confirm('Do you want to revenge?')) {
+                socket.emit('restart');
+            } else {
+                alert("Indeed. You're a loser.");
+            }
+        } else {
+            alert('You won! yay');
         }
     });
 

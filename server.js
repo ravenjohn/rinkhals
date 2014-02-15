@@ -1,10 +1,7 @@
-/*jslint node: true */
-"use strict";
-
 var config = require(__dirname + '/lib/config/config'),
     Game = require(__dirname + '/lib/game'),
     io = require('socket.io').listen(config.port),
-    games = [],
+    games = {},
     getGameBySocketId = function (id) {
         var i;
         for (i in games) {
@@ -15,6 +12,8 @@ var config = require(__dirname + '/lib/config/config'),
         return false;
     };
 
+io.set('browser client minification', true);
+io.set('browser client gzip', true);
 io.set('log level', 0);
 
 io.sockets.on('connection', function (socket) {
@@ -34,12 +33,9 @@ io.sockets.on('connection', function (socket) {
                 player = game.addPlayer(socket.id, data.name);
 
                 socket.join(game.id);
-                console.dir(game);
                 io.sockets.in(game.id).emit('setup game', game);
-                
-                setInterval(function () {
-                    io.sockets.in(game.id).emit('move', game.players);
-                }, 500);
+
+                game.start(io.sockets.in(game.id));
             }
         } else {
             console.log('1st player');
@@ -47,20 +43,19 @@ io.sockets.on('connection', function (socket) {
             player = game.addPlayer(socket.id, data.name);
 
             socket.emit('id', {id : game.id});
-            
+
             socket.join(game.id);
             io.sockets.in(game.id).emit('setup game', game);
             games[game.id] = game;
         }
     });
-    
+
     socket.on('move', function (data) {
         var game;
-        console.log('someone moved');
         if (game = getGameBySocketId(socket.id)) {
-            game.move(data, socket.id);
-            console.log(game.players[socket.id].orientation);
-            //io.sockets.in(game.id).emit('move', {orientation : data.orientation, id : socket.id});
+            game.players[socket.id].orientation = data.orientation;
+            
+            // game.move(data, socket.id);
         } else {
             socket.emit("warning", {message : "Unable to find your game"});
         }
@@ -81,10 +76,17 @@ io.sockets.on('connection', function (socket) {
         }
     });
     
-    if (config.mode === 'debug') {
+    socket.on('restart', function () {
+        var game;
+        if (game = getGameBySocketId(socket.id)) {
+            game.reset(io.sockets.in(game.id));
+        }
+    });
+
+    if (process.env.NODE_ENV === 'debug') {
         socket.on('kill', function () {
             process.exit(0);
-        }):
+        });
     }
 
 });
