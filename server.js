@@ -35,11 +35,13 @@ io.sockets.on('connection', function (socket) {
                 socket.join(game.id);
                 io.sockets.in(game.id).emit('setup game', game);
 
-                game.start(io.sockets.in(game.id));
+                if (game.m === game.playerCount) {
+                    game.start(io.sockets.in(game.id));
+                }
             }
         } else {
             console.log('1st player');
-            game = new Game(data.w, data.h);
+            game = new Game(data.w, data.h, data.m);
             player = game.addPlayer(socket.id, data.name);
 
             socket.emit('id', {id : game.id});
@@ -90,3 +92,5 @@ io.sockets.on('connection', function (socket) {
     }
 
 });
+
+console.log('Socket started on port ' + config.port);

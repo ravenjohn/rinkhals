@@ -12,6 +12,7 @@
 
 } ('http://ravenjohn.adin234.tk:8080/socket.io/socket.io.js', function (root, src) {
 // } ('http://localhost:8080/socket.io/socket.io.js', function (root, src) {
+// } ('http://192.168.1.50:8080/socket.io/socket.io.js', function (root, src) {
 
     var snakes,
         mysnake,
@@ -96,10 +97,21 @@
         (temp > -1 && temp < 4 && ~~(temp - mysnake.orientation) % 2) && socket.emit('move', {orientation : temp});
     };
 
-    socket.emit("new", {
-        id : prompt("ID"),
-        name : prompt("Name") || "Player One",
-        h : height,
-        w : width
-    });
+    if (confirm("New Game?")) {
+        socket.emit("new", {
+            id : prompt("ID"),
+            maxPlayers : prompt("Max players [1-50]"),
+            name : prompt("Name") || "Player One",
+            h : height,
+            w : width
+        });
+    }
+    else {
+        socket.emit("new", {
+            id : prompt("ID"),
+            name : prompt("Name") || "Player One",
+            h : height,
+            w : width
+        });    
+    }
 }));
