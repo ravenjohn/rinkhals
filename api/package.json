@@ -1,0 +1,12 @@
+{
+    "name": "snake"
+    , "version": "0.0.1"
+    , "dependencies":  {
+        "socket.io" : "0.9.16"
+    }
+    , "main" : "index.js"
+    , "scripts": {
+        "start": "node server.js"
+    }
+    , "engines": { "node": ">= 0.10.22" }
+}
