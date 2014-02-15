@@ -1,7 +1,8 @@
-var config = require(__dirname + '/lib/config/config'),
+var connect = require('connect'),
+    http =  require('http'),
+    io = require('socket.io'),
+    config = require(__dirname + '/lib/config/config'),
     Game = require(__dirname + '/lib/game'),
-    io = require('socket.io').listen(config.port),
-    games = {},
     getGameBySocketId = function (id) {
         var i;
         for (i in games) {
@@ -10,7 +11,14 @@ var config = require(__dirname + '/lib/config/config'),
             }
         }
         return false;
-    };
+    },
+    games = {},
+    app;
+    
+
+app = http.createServer(connect().use(connect.static(__dirname + '/public')));
+io = io.listen(app);
+app.listen(config.port);
 
 io.set('browser client minification', true);
 io.set('browser client gzip', true);
