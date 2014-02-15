@@ -41,7 +41,10 @@
                         temp[i].remove();
                 }
 
-                this.body.length > this.length && (temp = this.body.pop()) && temp.remove();
+                while (this.body.length > this.length) {
+                    this.body.pop().remove();
+                }
+
                 (temp = this.body[0]) && (temp.style.background = this.color);
                 temp = document.createElement('div');
                 temp.style.width = temp.style.height = this.unitSize + 'px';
