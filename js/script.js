@@ -12,13 +12,14 @@
 
 } ('http://ravenjohn.adin234.tk:8080/socket.io/socket.io.js', function (root, src) {
 
-    var b = document.getElementById('_snake_cover'),
-        socket = io.connect(src),
-        snakes,
+    var snakes,
         mysnake,
+        interval,
+        gameStarted = false,
+        socket = io.connect(src),
         width = ~~(window.innerWidth / 10) * 10,
         height = ~~(window.innerHeight / 10) * 10,
-        gameStarted = false,
+        b = document.getElementById('_snake_cover'),
         Snake = function (x, y) {
             this.unitSize = 10;
             this.body = [];
@@ -45,7 +46,22 @@
                 b.appendChild(temp);
             }
         },
-        interval;
+        start = function () {
+            var i;
+            gameStarted = true;
+            interval = setInterval(function () {
+               var i, temp;
+               for (i in snakes){
+                   temp = snakes[i];
+                   switch (temp.orientation) {
+                       case 0 : temp.drawHead(temp.headX - temp.unitSize, temp.headY); break;
+                       case 1 : temp.drawHead(temp.headX, temp.headY - temp.unitSize); break;
+                       case 2 : temp.drawHead(temp.headX + temp.unitSize, temp.headY); break;
+                       case 3 : temp.drawHead(temp.headX, temp.headY + temp.unitSize);
+                   }
+               }
+            }, 100);
+        };
     
     b.style.position = 'fixed';
     b.style.top = 0;
@@ -54,7 +70,6 @@
     socket.on("id", function (data) {
         location.hash = data.id;
     });
-    
     
     socket.on('setup game', function (data) {
         var i, temp;
@@ -92,21 +107,4 @@
         h : height,
         w : width
     });
-    
-    function start () {
-        var i;
-        gameStarted = true;
-//        interval = setInterval(function () {
-//            var i, temp;
-//            for (i in snakes){
-//                temp = snakes[i];
-//                switch (temp.orientation) {
-//                    case 0 : temp.drawHead(temp.headX - temp.unitSize, temp.headY); break;
-//                    case 1 : temp.drawHead(temp.headX, temp.headY - temp.unitSize); break;
-//                    case 2 : temp.drawHead(temp.headX + temp.unitSize, temp.headY); break;
-//                    case 3 : temp.drawHead(temp.headX, temp.headY + temp.unitSize);
-//                }
-//            }
-//       }, 100);
-    };
 }));
