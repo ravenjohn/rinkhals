@@ -9,8 +9,8 @@
     };
     document.body.appendChild(s);
     document.body.innerHTML += '<div id="_snake_cover"></div>';
-} ('http://ravenjohn.adin234.tk:8080/socket.io/socket.io.js',
-    function (root, src) {
+
+} ('http://ravenjohn.adin234.tk:8080/socket.io/socket.io.js', function (root, src) {
 
     var b = document.getElementById('_snake_cover'),
         socket = io.connect(src),
