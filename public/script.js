@@ -10,9 +10,9 @@
     document.body.appendChild(s);
     document.body.innerHTML += '<div id="_snake_cover"></div>';
 
-} ('http://ravenjohn.adin234.tk:8080/socket.io/socket.io.js', function (root, src) {
-// } ('http://localhost:8080/socket.io/socket.io.js', function (root, src) {
-// } ('http://192.168.1.50:8080/socket.io/socket.io.js', function (root, src) {
+} ('http://ravenjohn.adin234.tk/socket.io/socket.io.js', function (root, src) {
+// } ('http://localhost:3000/socket.io/socket.io.js', function (root, src) {
+// } ('http://192.168.1.50:3000/socket.io/socket.io.js', function (root, src) {
 
     var snakes,
         mysnake,
@@ -30,13 +30,17 @@
             this.body = [];
             this.orientation = 2;
             this.unitSize = 10;
+            this.length = 5;
             this.drawHead = function (x, y) {
-                var temp;
+                var temp, i;
 
-                //if (document.querySelectorAll('.r' + x + y).length)
-                //    return start();
+                temp = document.querySelectorAll('.food' + x + y);
+                if (i = temp.length) {
+                    while (i--)
+                        temp[i].remove();
+                }
 
-                this.body.length > 5 && (temp = this.body.pop()) && temp.remove();
+                this.body.length > this.length && (temp = this.body.pop()) && temp.remove();
                 (temp = this.body[0]) && (temp.style.background = this.color);
                 temp = document.createElement('div');
                 temp.style.width = temp.style.height = this.unitSize + 'px';
@@ -73,8 +77,21 @@
               
     socket.on('move', function (data) {
         console.log('move', data.orientation, data.headX, data.headY);
+        snakes[data.id].length = data.length;
         snakes[data.id].orientation = data.orientation;
         snakes[data.id].drawHead(data.headX, data.headY);
+    });
+    
+    socket.on('spawnFood', function (data) {
+        var temp = document.createElement('div');
+        temp.style.width = temp.style.height = '10px';
+        temp.style.position = 'absolute';
+        temp.style.zIndex = 999999;
+        temp.style.left = data.x + 'px';
+        temp.style.top = data.y + 'px';
+        temp.className = 'food' + data.x + data.y;
+        temp.style.background = 'black';
+        b.appendChild(temp);
     });
     
     socket.on('collision', function (data) {
@@ -99,8 +116,7 @@
 
     if (confirm("New Game?")) {
         socket.emit("new", {
-            id : prompt("ID"),
-            maxPlayers : prompt("Max players [1-50]"),
+            m : prompt("Max players [1-50]"),
             name : prompt("Name") || "Player One",
             h : height,
             w : width
@@ -109,9 +125,7 @@
     else {
         socket.emit("new", {
             id : prompt("ID"),
-            name : prompt("Name") || "Player One",
-            h : height,
-            w : width
+            name : prompt("Name") || "Other Player"
         });    
     }
 }));

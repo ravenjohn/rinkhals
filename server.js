@@ -1,6 +1,6 @@
 var connect = require('connect'),
-    http =  require('http'),
-    io = require('socket.io'),
+    app = require('http').createServer(connect().use(connect.static(__dirname + '/public'))),
+    io = require('socket.io').listen(app),
     config = require(__dirname + '/lib/config/config'),
     Game = require(__dirname + '/lib/game'),
     getGameBySocketId = function (id) {
@@ -12,13 +12,7 @@ var connect = require('connect'),
         }
         return false;
     },
-    games = {},
-    app;
-    
-
-app = http.createServer(connect().use(connect.static(__dirname + '/public')));
-io = io.listen(app);
-app.listen(config.port);
+    games = {};
 
 io.set('browser client minification', true);
 io.set('browser client gzip', true);
@@ -28,7 +22,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('new', function (data) {
         var game, player, temp;
-        console.log("new", data);
+
         if (game = getGameBySocketId(socket.id)) {
             socket.emit('warning', {message : "You are already part of a game. duh"});
         } else if (game = games[data.id]) {
@@ -43,6 +37,8 @@ io.sockets.on('connection', function (socket) {
                 socket.join(game.id);
                 io.sockets.in(game.id).emit('setup game', game);
 
+                console.log('max', game.m);
+                
                 if (game.m === game.playerCount) {
                     game.start(io.sockets.in(game.id));
                 }
@@ -64,8 +60,6 @@ io.sockets.on('connection', function (socket) {
         var game;
         if (game = getGameBySocketId(socket.id)) {
             game.players[socket.id].orientation = data.orientation;
-            
-            // game.move(data, socket.id);
         } else {
             socket.emit("warning", {message : "Unable to find your game"});
         }
@@ -81,7 +75,6 @@ io.sockets.on('connection', function (socket) {
                 room = room.replace('/', '');
                 io.sockets.in(room).emit('warning', {message : games[room].players[socket.id].name + ' has been disconnected.'});
                 socket.leave(room);
-                // delete games[room];
             }
         }
     });
@@ -101,4 +94,6 @@ io.sockets.on('connection', function (socket) {
 
 });
 
+
+app.listen(config.port);
 console.log('Socket started on port ' + config.port);
