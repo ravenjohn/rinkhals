@@ -160,7 +160,7 @@
         if (temp > -1 && temp < 4 && ~~(temp - mysnake.orientation) % 2 && (+new Date - cache) > speed) {
             //mysnake.orientation = temp;
             cache = +new Date;
-            socket.emit('move', {orientation : temp, body : mysnake.bodyData()});
+            socket.emit('move', {orientation : temp, id : location.hash.substring(1)});
         }
     };
 

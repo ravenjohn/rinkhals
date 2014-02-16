@@ -57,11 +57,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('move', function (data) {
-        var game;
-        if (game = getGameBySocketId(socket.id)) {
-            data.id = socket.id;
-            io.sockets.in(game.id).emit('move', data);
-        }
+        io.sockets.in(data.id).emit('move', data);
     });
     
     socket.on('restart', function () {
