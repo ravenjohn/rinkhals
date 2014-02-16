@@ -1,22 +1,23 @@
-(function (src, callback) {
-    var i = src.length, s;
-
+(function (callback) {
+    var src = {
+            production : 'desolate-bastion-8292.herokuapp.com',
+            development : 'localhost:5000'
+        },
+        temp = src[location.search.replace( "?", "") || 'production'],
+        s = document.createElement('script');
+    
     document.body.innerHTML += '<div id="_snake_cover"></div>';
 
-    while (i--) {
-        s = document.createElement('script');
-        s.type = 'text/javascript';
-        s.src = 'http://' + src[i] + '/socket.io/socket.io.js';
-        s.async = false;
-        s.onreadystatechange = s.onload = function () {
-            callback(this, src[i]);
-        };
-        document.body.appendChild(s);
-        if (typeof io !== '' + void 0)
-            break;
-    }
+    s.type = 'text/javascript';
+    s.src = 'http://' + temp + '/socket.io/socket.io.js';
+    s.async = false;
+    s.onreadystatechange = s.onload = function () {
+        callback(this, temp);
+    };
 
-} (['desolate-bastion-8292.herokuapp.com', 'localhost:5000'], function (root, src) {
+    document.body.appendChild(s);
+
+} (function (root, src) {
 
     var snakes,
         mysnake,
