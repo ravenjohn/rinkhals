@@ -39,7 +39,7 @@ io.sockets.on('connection', function (socket) {
                 if (game.m === game.playerCount) {
                     io.sockets.in(game.id).emit('setup game', game);
                     io.sockets.in(game.id).emit('start');
-                    setInterval(function () {
+                    game.foodInterval = setInterval(function () {
                         game.spawnFoods(io.sockets.in(game.id));
                     }, 5000);
                 }
@@ -70,6 +70,18 @@ io.sockets.on('connection', function (socket) {
             io.sockets.in(game.id).emit('setup game', game);
             io.sockets.in(game.id).emit('start');
         }
+    });
+    
+    socket.on('disconnect', function () {
+        var game;
+        if (game = getGameBySocketId(socket.id)){
+            socket.leave(game.id);
+            if (--game.playerCount === 0) {
+                clearInterval(game.foodInterval);
+                delete games[game.id];
+            }
+        }
+        socket.disconnect();
     });
 
 });
