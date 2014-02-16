@@ -21,37 +21,37 @@ io.set('log level', 0);
 io.sockets.on('connection', function (socket) {
 
     socket.on('new', function (data) {
-        var game, player, temp;
+        var game;
 
         if (game = getGameBySocketId(socket.id)) {
             socket.emit('warning', {message : "You are already part of a game. duh"});
         } else if (game = games[data.id]) {
-            if (game.playerCount === config.maxPlayers) {
+            if (game.playerCount === game.m) {
                 socket.emit('warning', {message : 'Game full'});
             } else if (game.gameStarted) {
                 socket.emit('warning', {message : 'Game already started'});
             } else {
                 console.log('another player');
-                player = game.addPlayer(socket.id, data.name);
 
+                game.addPlayer(socket.id, data.name);
                 socket.join(game.id);
-                io.sockets.in(game.id).emit('setup game', game);
 
-                console.log('max', game.m);
-                
                 if (game.m === game.playerCount) {
-                    game.start(io.sockets.in(game.id));
+                    io.sockets.in(game.id).emit('setup game', game);
+                    io.sockets.in(game.id).emit('start');
+                    setInterval(function () {
+                        game.spawnFoods(io.sockets.in(game.id));
+                    }, 5000);
                 }
             }
         } else {
             console.log('1st player');
             game = new Game(data.w, data.h, data.m);
-            player = game.addPlayer(socket.id, data.name);
+            game.addPlayer(socket.id, data.name);
 
             socket.emit('id', {id : game.id});
-
             socket.join(game.id);
-            io.sockets.in(game.id).emit('setup game', game);
+
             games[game.id] = game;
         }
     });
@@ -59,38 +59,18 @@ io.sockets.on('connection', function (socket) {
     socket.on('move', function (data) {
         var game;
         if (game = getGameBySocketId(socket.id)) {
-            game.players[socket.id].orientation = data.orientation;
-        } else {
-            socket.emit("warning", {message : "Unable to find your game"});
-        }
-    });
-
-    socket.on('disconnect', function () {
-        console.log('client disconnected');
-        var rooms = io.sockets.manager.roomClients[socket.id],
-            room;
-
-        for (room in rooms) {
-            if (room && rooms[room]) {
-                room = room.replace('/', '');
-                io.sockets.in(room).emit('warning', {message : games[room].players[socket.id].name + ' has been disconnected.'});
-                socket.leave(room);
-            }
+            data.id = socket.id;
+            io.sockets.in(game.id).emit('move', data);
         }
     });
     
     socket.on('restart', function () {
         var game;
         if (game = getGameBySocketId(socket.id)) {
-            game.reset(io.sockets.in(game.id));
+            io.sockets.in(game.id).emit('setup game', game);
+            io.sockets.in(game.id).emit('start');
         }
     });
-
-    if (process.env.NODE_ENV === 'debug') {
-        socket.on('kill', function () {
-            process.exit(0);
-        });
-    }
 
 });
 
