@@ -12,7 +12,7 @@
             callback(this, src[i]);
         };
         document.body.appendChild(s);
-        if (typeof io !== void 0) break;
+        if (typeof io !== '' + void 0) break;
     }
 
 } (['desolate-bastion-8292.herokuapp.com', 'localhost:5000'], function (root, src) {
