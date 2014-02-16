@@ -71,13 +71,13 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function () {
         var game;
         if (game = getGameBySocketId(socket.id)){
+            console.dir(game);
             socket.leave(game.id);
             if (--game.playerCount === 0) {
-                clearInterval(game.foodInterval);
+                game.foodInterval && clearInterval(game.foodInterval);
                 delete games[game.id];
             }
         }
-        socket.disconnect();
     });
 
 });
